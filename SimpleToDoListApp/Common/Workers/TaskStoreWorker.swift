@@ -19,13 +19,34 @@ protocol TaskStoreWorkerProtocol {
 
 class TaskStoreWorker: TaskStoreWorkerProtocol {
     private let userDefaultsKey = "saved_tasks"
+    private let userDefaults: UserDefaults
+    
+    init(userDefaults: UserDefaults = .standard) {
+        self.userDefaults = userDefaults
+    }
     
     func fetchTasks() -> [Task] {
-        //TODO: - Load from UserDefaults
-        return []
+        guard let data = userDefaults.data(forKey: userDefaultsKey) else {
+            return []
+        }
+        
+        do {
+            let tasks = try JSONDecoder().decode([Task].self, from: data)
+            
+            return tasks
+        } catch {
+            print("Error decoding tasks: \(error)")
+            
+            return []
+        }
     }
     
     func saveTask(_ tasks: [Task]) {
-        //TODO: - Save to UserDefaults
+        do {
+            let data = try JSONEncoder().encode(tasks)
+            userDefaults.set(data, forKey: userDefaultsKey)
+        } catch {
+            print("Error encoding tasks: \(error)")
+        }
     }
 }
