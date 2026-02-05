@@ -31,8 +31,7 @@ class TaskListInteractor: TaskListBusinessLogic {
     var presenter: TaskListPresentationLogic?
     
     // Dependency: Worker that handles storage
-    //TODO: - Implement
-    //    var worker: TaskStoreWorkerProtocol?
+    var worker: TaskStoreWorkerProtocol?
     
     
     // Business Logic Methods
