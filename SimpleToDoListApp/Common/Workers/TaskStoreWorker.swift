@@ -18,7 +18,7 @@ protocol TaskStoreWorkerProtocol {
 //MARK: - Worker Implementation
 
 class TaskStoreWorker: TaskStoreWorkerProtocol {
-    private let userDefaultsKey = "saved_tasks"
+    private let userDefaultsKey = Constants.taskWorkerUserDefaultsKey
     private let userDefaults: UserDefaults
     
     init(userDefaults: UserDefaults = .standard) {

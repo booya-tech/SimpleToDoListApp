@@ -86,7 +86,7 @@ class TaskListInteractor: TaskListBusinessLogic {
             let response = TaskList.AddTask.Response(
                 task: nil,
                 success: false,
-                errorMessage: "empty_title"
+                errorMessage: Constants.addTaskErrorMessageEmptyKey
             )
             presenter?.presentAddResult(response: response)
             
@@ -98,7 +98,7 @@ class TaskListInteractor: TaskListBusinessLogic {
             let response = TaskList.AddTask.Response(
                 task: nil,
                 success: false,
-                errorMessage: "long_title"
+                errorMessage: Constants.addTaskErrorMessageExceededCharactersKey
             )
             presenter?.presentAddResult(response: response)
             
