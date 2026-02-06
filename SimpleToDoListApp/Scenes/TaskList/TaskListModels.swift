@@ -18,7 +18,7 @@ enum TaskList {
         }
         
         struct ViewModel {
-            struct DisplayTask {
+            struct DisplayTask: Identifiable {
                 let id: UUID
                 let title: String
                 let isCompleted: Bool
