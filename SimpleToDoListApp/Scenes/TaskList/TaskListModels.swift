@@ -22,7 +22,7 @@ enum TaskList {
                 let id: UUID
                 let title: String
                 let isCompleted: Bool
-                let displayData: String
+                let displayDate: String
             }
             
             let displayTasks: [DisplayTask]
