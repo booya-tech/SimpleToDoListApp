@@ -29,25 +29,127 @@ protocol TaskListPresentationLogic {
 class TaskListInteractor: TaskListBusinessLogic {
     // Output: Talks to Presenter
     var presenter: TaskListPresentationLogic?
-    
     // Dependency: Worker that handles storage
     var worker: TaskStoreWorkerProtocol?
     
+    // In-memory cache of tasks
+    private var tasks: [Task] = []
     
     // Business Logic Methods
     func fetchTasks() {
-        //TODO: - Implement
+        // Get tasks from Worker
+        tasks = worker?.fetchTasks() ?? []
+        
+        // Create a response
+        let response = TaskList.FetchTask.Response(tasks: tasks)
+        
+        // Send to Presenter
+        presenter?.presentTasks(response: response)
     }
     
     func toggleTask(request: TaskList.ToggleTask.Request) {
-        //TODO: - Implement
+        // Find the task
+        guard let index = tasks.firstIndex(where: { $0.id == request.taskId }) else {
+            // Task not found - create failure response
+            let response = TaskList.ToggleTask.Response(
+                updatedTask: Task(id: request.taskId, title: ""),
+                success: false
+            )
+            presenter?.presentToggleResult(response: response)
+            
+            return
+        }
+        
+        // Toggle completion status
+        tasks[index].isCompleted.toggle()
+        
+        // Save to storage
+        worker?.saveTask(tasks)
+        
+        // Create success response
+        let response = TaskList.ToggleTask.Response(
+            updatedTask: tasks[index],
+            success: true
+        )
+        
+        // Send to Presenter
+        presenter?.presentToggleResult(response: response)
+        
     }
     
     func addTask(request: TaskList.AddTask.Request) {
-        //TODO: - Implement
+        // Validate title (Business Rule)
+        let trimmedTitle = request.title.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard !trimmedTitle.isEmpty else {
+            // Validation failed
+            let response = TaskList.AddTask.Response(
+                task: nil,
+                success: false,
+                errorMessage: "empty_title"
+            )
+            presenter?.presentAddResult(response: response)
+            
+            return
+        }
+        
+        guard trimmedTitle.count <= 100 else {
+            // Validation failed
+            let response = TaskList.AddTask.Response(
+                task: nil,
+                success: false,
+                errorMessage: "long_title"
+            )
+            presenter?.presentAddResult(response: response)
+            
+            return
+        }
+        
+        // Create new task
+        let newTask = Task(
+            id: UUID(),
+            title: trimmedTitle,
+            isCompleted: false,
+            createdAt: Date()
+        )
+        
+        // Add to collection
+        tasks.append(newTask)
+        
+        // Save to storage
+        worker?.saveTask(tasks)
+        
+        // Create a success response
+        let response = TaskList.AddTask.Response(
+            task: newTask,
+            success: true,
+            errorMessage: nil
+        )
+        
+        // Send to Presenter
+        presenter?.presentAddResult(response: response)
     }
     
     func deleteTask(request: TaskList.DeleteTask.Request) {
-        //TODO: - Implement
+        // Find and remove task
+        guard let index = tasks.firstIndex(where: { $0.id == request.taskId }) else {
+            // Task not found
+            let response = TaskList.DeleteTask.Response(success: false)
+            presenter?.presentDeleteResult(response: response)
+            
+            return
+        }
+        
+        // Remove from array
+        tasks.remove(at: index)
+        
+        // Save to storage
+        worker?.saveTask(tasks)
+        
+        // Create success response
+        let response = TaskList.DeleteTask.Response(success: true)
+        
+        // Send to Presenter
+        presenter?.presentDeleteResult(response: response)
     }
 }
